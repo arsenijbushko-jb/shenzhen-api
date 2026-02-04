@@ -4,13 +4,14 @@ import json
 import os
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})  # Разрешаем всем (можно потом ограничить)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-# Читаем places.json (скопируй файл из старого репозитория)
+# Загружаем места
 PLACES = []
 try:
     with open('places.json', 'r', encoding='utf-8') as f:
         PLACES = json.load(f)
+    print(f"Загружено мест: {len(PLACES)}")
 except Exception as e:
     print(f"Ошибка загрузки places.json: {e}")
 
@@ -78,9 +79,12 @@ def generate_route(data):
 
 @app.route('/api/generate', methods=['POST'])
 def api_generate():
-    data = request.get_json()
-    route = generate_route(data)
-    return jsonify({'route': route})
+    try:
+        data = request.get_json()
+        route = generate_route(data)
+        return jsonify({'route': route})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 8080))
